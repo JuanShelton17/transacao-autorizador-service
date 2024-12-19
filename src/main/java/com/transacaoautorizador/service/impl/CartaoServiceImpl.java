@@ -50,8 +50,10 @@ public class CartaoServiceImpl implements CartaoService {
                     return g.fromJson(response.body(), tipoLista);
 
                 default:
-                    throw new CartaoException(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage(ERROR_OBTER_DADOS_CARTAO, null, Locale.getDefault()));
+                    throw new CartaoException(HttpStatus.NOT_FOUND, messageSource.getMessage(ERROR_OBTER_DADOS_CARTAO, null, Locale.getDefault()));
             }
+        }catch (CartaoException e){
+            throw e;
         }catch (Exception e){
             throw new RuntimeException(e.getMessage());
         }
@@ -74,7 +76,10 @@ public class CartaoServiceImpl implements CartaoService {
                 default:
                     throw new CartaoException(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage(ERROR_ATUALIZAR_DADOS_CARTAO, null, Locale.getDefault()));
             }
-        }catch (Exception e){
+        }catch (CartaoException e){
+            throw e;
+        }
+        catch (Exception e){
             throw new RuntimeException(e.getMessage());
         }
     }
