@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.transacaoautorizador.constants.HttpStatusConstants;
-import com.transacaoautorizador.exception.AulasException;
+import com.transacaoautorizador.exception.CartaoException;
 import com.transacaoautorizador.service.CartaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.MessageSource;
@@ -19,12 +19,13 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Base64;
 import java.util.Locale;
 
-import static com.transacaoautorizador.constants.AppConstants.ERROR_OBTER_DADOS_CARTAO;
+import static com.transacaoautorizador.constants.MessageConstants.ERROR_ATUALIZAR_DADOS_CARTAO;
+import static com.transacaoautorizador.constants.MessageConstants.ERROR_OBTER_DADOS_CARTAO;
 import static com.transacaoautorizador.constants.RequestsConstants.URL_CARTAO_AUTORIZADOR;
 import static com.transacaoautorizador.constants.RequestsConstants.URL_CARTAO_AUTORIZADOR_DADOS_CARTAO;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +50,7 @@ public class CartaoServiceImpl implements CartaoService {
                     return g.fromJson(response.body(), tipoLista);
 
                 default:
-                    throw new AulasException(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage(ERROR_OBTER_DADOS_CARTAO, null, Locale.getDefault()));
+                    throw new CartaoException(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage(ERROR_OBTER_DADOS_CARTAO, null, Locale.getDefault()));
             }
         }catch (Exception e){
             throw new RuntimeException(e.getMessage());
@@ -71,7 +72,7 @@ public class CartaoServiceImpl implements CartaoService {
                     return g.fromJson(response.body(), tipoLista);
 
                 default:
-                    throw new AulasException(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage(ERROR_OBTER_DADOS_CARTAO, null, Locale.getDefault()));
+                    throw new CartaoException(HttpStatus.INTERNAL_SERVER_ERROR, messageSource.getMessage(ERROR_ATUALIZAR_DADOS_CARTAO, null, Locale.getDefault()));
             }
         }catch (Exception e){
             throw new RuntimeException(e.getMessage());
@@ -82,25 +83,35 @@ public class CartaoServiceImpl implements CartaoService {
         var urlComPath = String.format("%s/%s", URL_CARTAO_AUTORIZADOR_DADOS_CARTAO, pathParam);
         return  URI.create(urlComPath);
     }
+
     private URI getUriUpdate() {
         return  URI.create(URL_CARTAO_AUTORIZADOR);
     }
 
     private HttpRequest getRequest(URI url) {
+        String username = "username";
+        String password = "password";
+        String authHeader = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
 
         return HttpRequest.newBuilder()
                 .GET()
                 .uri(url)
+                .header("Authorization", "Basic "+ authHeader)
                 .build();
     }
 
     private HttpRequest getRequestUpdate(URI url, NovoCartao novoCartao) throws JsonProcessingException {
+        String username = "username";
+        String password = "password";
+        String authHeader = Base64.getEncoder().encodeToString((username + ":" + password).getBytes());
+
         String jsonBody = objectMapper.writeValueAsString(novoCartao);
 
         return HttpRequest.newBuilder()
                 .uri(url)
                 .header("Content-Type", "application/json")
                 .PUT(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .header("Authorization", "Basic " + authHeader)
                 .build();
     }
 

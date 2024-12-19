@@ -2,7 +2,6 @@ package com.transacaoautorizador.controller;
 
 import com.transacaoautorizador.TransacoesApi;
 import com.transacaoautorizador.model.TransacaoDTO;
-import com.transacaoautorizador.repository.TransacaoRepository;
 import com.transacaoautorizador.service.TransacaoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +18,6 @@ public class TransacaoControllerImpl implements TransacoesApi {
 
         String resultado = service.autorizarTransacao(transacaoDTO);
 
-        if (!"OK".equals(resultado)) {
-            return ResponseEntity.unprocessableEntity().body(resultado);
-        }
-
-        return ResponseEntity.status(201).body(resultado);
+        return "OK".equals(resultado) ? ResponseEntity.status(201).body(resultado) : ResponseEntity.unprocessableEntity().body(resultado);
     }
 }
