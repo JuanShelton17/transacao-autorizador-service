@@ -1,0 +1,45 @@
+openapi: 3.0.1
+info:
+  title: Transação Service API
+  version: 1.0.0
+  description: API para gerenciar transações
+paths:
+  /transacoes:
+    post:
+      summary: Autorizar uma transação
+      operationId: autorizarTransacao
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransacaoDTO'
+      responses:
+        '201':
+          description: Transação autorizada
+          content:
+            application/json:
+              schema:
+                type: string
+        '422':
+          description: Falha na autorização
+          content:
+            application/json:
+              schema:
+                type: string
+components:
+  schemas:
+    TransacaoDTO:
+      type: object
+      required:
+        - numeroCartao
+        - senhaCartao
+        - valor
+      properties:
+        numeroCartao:
+          type: string
+        senhaCartao:
+          type: string
+        valor:
+          type: number
+          format: double
